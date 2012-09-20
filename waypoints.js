@@ -13,6 +13,10 @@ whenever you scroll to an element.
 GitHub Repository: https://github.com/imakewebthings/jquery-waypoints
 Documentation and Examples: http://imakewebthings.github.com/jquery-waypoints
 
+******
+	forked to add mobile support for iOS - CB
+******
+
 Changelog:
 	v1.1.7
 		- Actually fix the post-load bug in Issue #28 from v1.1.3.
@@ -65,6 +69,11 @@ Support:
 	
 	// Keeping common strings as variables = better minification
 	eventName = 'waypoint.reached',
+
+	/*
+		Quick, dirty mobile iOS test
+	*/
+	isMobileiOS = (navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPad/i));
 	
 	/*
 	For the waypoint and direction passed in, trigger the waypoint.reached
@@ -89,7 +98,7 @@ Support:
 		}
 		return i;
 	},
-	
+
 	// Private list of all elements used as scrolling contexts for waypoints.
 	contexts = [],
 	
@@ -162,13 +171,18 @@ Support:
 		});
 		
 		// Setup scroll and resize handlers.  Throttled at the settings-defined rate limits.
-		$(context).bind('scroll.waypoints', $.proxy(function() {
+		$(context).bind('scroll.waypoints touchmove.waypoints', $.proxy(function() {
 			if (!this.didScroll) {
 				this.didScroll = true;
-				window.setTimeout($.proxy(function() {
+				if(isMobileiOS) {
 					this.doScroll();
 					this.didScroll = false;
-				}, this), $[wps].settings.scrollThrottle);
+				} else {
+					window.setTimeout($.proxy(function() {
+						this.doScroll();
+						this.didScroll = false;
+					}, this), $[wps].settings.scrollThrottle);
+				}
 			}
 		}, this)).bind('resize.waypoints', $.proxy(function() {
 			if (!this.didResize) {
@@ -359,7 +373,7 @@ Support:
 						c.waypoints.splice(ndx, 1);
 
 						if (!c.waypoints.length) {
-							c.element.unbind('scroll.waypoints resize.waypoints');
+							c.element.unbind('scroll.waypoints touchmove.waypoints resize.waypoints');
 							contexts.splice(i, 1);
 						}
 					}
